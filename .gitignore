@@ -18,6 +18,9 @@ Client/Client/[Bb]uilds/
 Client/Client/[Ll]ogs/
 Client/Client/[Mm]emoryCaptures/
 
+Server/Server/Server/bin
+Server/Server/Server/obj
+
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
 
