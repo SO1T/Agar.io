@@ -6,7 +6,7 @@ public class PlayerManager : MonoBehaviour
 {
     public float speed;
     public Rigidbody2D rb;
-    public int mass = 1;
+    public float mass = 100;
     // Update is called once per frame
     void Update()
     {
@@ -18,8 +18,12 @@ public class PlayerManager : MonoBehaviour
     public void Grow(int mass)
     {
         Debug.Log("Grow");
+        this.speed -= mass*0.05f;
+        Debug.Log("Mass = " + mass);
+        Debug.Log("This.mass = " + this.mass);
+        Debug.Log("mass/this.mass= " + mass / this.mass);
+        float scale = transform.localScale.x + mass/this.mass;
         this.mass += mass;
-        float scale = 0.1f * mass;
-        transform.localScale += new Vector3(scale, scale, scale);
+        transform.localScale = new Vector3(scale, scale, scale);
     }
 }

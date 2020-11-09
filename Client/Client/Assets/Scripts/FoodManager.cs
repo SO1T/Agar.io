@@ -4,12 +4,20 @@ using UnityEngine;
 
 public class FoodManager : MonoBehaviour
 {
-    private void OnTriggerEnter2D(Collider2D collision)
+    public GameObject food;
+    void Start()
     {
-        if (collision.gameObject.CompareTag("Player"))
+        StartCoroutine(InstantiateFood());
+    }
+
+    IEnumerator InstantiateFood()
+    {
+        while (true)
         {
-            collision.gameObject.GetComponent<PlayerManager>().Grow(1);
-            Destroy(gameObject);
+            float x = Random.Range(-50, 50);
+            float y = Random.Range(-50, 50);
+            Instantiate(food, new Vector3(x, y, 0), Quaternion.identity, gameObject.transform);
+            yield return new WaitForSeconds(0.1f);
         }
     }
 }
