@@ -25,25 +25,20 @@ public class PlayerManager : MonoBehaviour
             Destroy(this);
         }
     }
-    void Update()
+    void FixedUpdate()
     {
         if (isMoving)
         {
             Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 direction = (mousePosition - transform.position).normalized;
-            rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
-            SendDirection(direction);
+            //var velocity = new Vector2(direction.x * speed, direction.y * speed);
+            //transform.position += new Vector3(0.1f * velocity.x, 0.1f * velocity.y, 0);
+            ConnectionManager.instance.SendDirection(direction);
+            Vector2 newPosition = ConnectionManager.instance.ReceivePosition();
+            transform.position = new Vector3(newPosition.x, newPosition.y, 0);
         }
     }
 
-    private void SendDirection(Vector2 direction)
-    {
-        Debug.Log(direction);
-        List<byte> message = new List<byte>();
-        message.AddRange(BitConverter.GetBytes(direction.x));
-        message.AddRange(BitConverter.GetBytes(direction.y));
-        ConnectionManager.instance.udpClient.Send(message.ToArray(), message.Count);
-    }
 
     public void Grow(int mass)
     {
