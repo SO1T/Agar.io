@@ -1259,10 +1259,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2067168472}
-  - component: {fileID: 2067168473}
   - component: {fileID: 2067168475}
   - component: {fileID: 2067168474}
   - component: {fileID: 2067168476}
+  - component: {fileID: 2067168473}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1324,8 +1324,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 0f9162009ffbbed47a92a0760c8923ee, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 2e06cfc90e36cc142959088579801f1e, type: 3}
+  m_Color: {r: 0.12156862, g: 0.94509804, b: 0.20459318, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -31,7 +32,17 @@ public class PlayerManager : MonoBehaviour
             Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 direction = (mousePosition - transform.position).normalized;
             rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
+            SendDirection(direction);
         }
+    }
+
+    private void SendDirection(Vector2 direction)
+    {
+        Debug.Log(direction);
+        List<byte> message = new List<byte>();
+        message.AddRange(BitConverter.GetBytes(direction.x));
+        message.AddRange(BitConverter.GetBytes(direction.y));
+        ConnectionManager.instance.udpClient.Send(message.ToArray(), message.Count);
     }
 
     public void Grow(int mass)
@@ -44,21 +55,5 @@ public class PlayerManager : MonoBehaviour
         float scale = transform.localScale.x + mass/this.mass;
         this.mass += mass;
         transform.localScale = new Vector3(scale, scale, scale);
-    }
-
-    private void GetId()
-    {
-        var client = new UdpClient();
-        IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000); // endpoint where server is listening
-        client.Connect(ep);
-
-        // send data
-        client.Send(new byte[] { 1, 2, 3, 4, 5 }, 5);
-
-        // then receive data
-        var receivedData = client.Receive(ref ep);
-
-        Debug.Log("receive data from " + ep.ToString());
-        Debug.Log(receivedData);
     }
 }
