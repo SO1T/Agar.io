@@ -29,6 +29,9 @@ namespace Server
         {
             Player player = new Player();
             DateTime _nextLoop = DateTime.Now;
+
+            Thread thread = new Thread(() => SendFoodPosition(udpServer, remoteEP));
+            thread.Start();
             while (true)
             {
                 while (_nextLoop < DateTime.Now)
@@ -85,9 +88,25 @@ namespace Server
             Vector2 position = player.GetPosition(direction);
             Console.WriteLine(position);
             List<byte> message = new List<byte>();
+            message.AddRange(BitConverter.GetBytes(0));
             message.AddRange(BitConverter.GetBytes(position.X));
             message.AddRange(BitConverter.GetBytes(position.Y));
             udpServer.Send(message.ToArray(), message.Count, remoteEP);
+        }
+
+        private static void SendFoodPosition(UdpClient udpServer, IPEndPoint remoteEP)
+        {
+            while (true)
+            {
+                Vector2 position = FoodCreator.CreateFood();
+                Console.WriteLine("Food spawned = " + position);
+                List<byte> message = new List<byte>();
+                message.AddRange(BitConverter.GetBytes(1));
+                message.AddRange(BitConverter.GetBytes(position.X));
+                message.AddRange(BitConverter.GetBytes(position.Y));
+                udpServer.Send(message.ToArray(), message.Count, remoteEP);
+                Thread.Sleep(100);
+            }
         }
     }
 }

@@ -70,13 +70,26 @@ public class ConnectionManager : MonoBehaviour
     public Vector2 ReceivePosition()
     {
         // then receive data
+        int packetNumber;
+        Vector2 position = ReceivePacket(out packetNumber);
+        while (packetNumber != 0)
+        {
+            FoodManager.instance.InstantiateFood(position);
+            position = ReceivePacket(out packetNumber);
+        }
+        Debug.Log(position);
+        return position;
+    }
+
+    private Vector2 ReceivePacket(out int packetNumber)
+    {
         var receivedData = udpClient.Receive(ref serverEndPoint);
 
         Debug.Log("receive data from " + serverEndPoint.ToString());
         Vector2 position;
-        position.x = BitConverter.ToSingle(receivedData, 0);
-        position.y = BitConverter.ToSingle(receivedData, 4);
-        Debug.Log(position);
+        packetNumber = BitConverter.ToInt32(receivedData, 0);
+        position.x = BitConverter.ToSingle(receivedData, 4);
+        position.y = BitConverter.ToSingle(receivedData, 8);
         return position;
     }
 
