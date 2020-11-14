@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -13,100 +14,33 @@ namespace Server
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            UdpClient udpServer = new UdpClient(11000);
+            var serviceProvider = SetUpDependencyInjection();
 
-            var remoteEP = new IPEndPoint(IPAddress.Any, 11000);
-          
-            remoteEP = ReceiveUsername(udpServer, remoteEP);
-
-            Console.Write("receive data from " + remoteEP.ToString());
-            int id = 1;
-            udpServer.Send(BitConverter.GetBytes(id), 4, remoteEP); // reply back
-            DirectionPositionInteraction(udpServer, remoteEP);
+            IGameManager gameManager = serviceProvider.GetService<IGameManager>();
+            gameManager.StartGame();
         }
-
-        private static void DirectionPositionInteraction(UdpClient udpServer, IPEndPoint remoteEP)
+        
+        static ServiceProvider SetUpDependencyInjection()
         {
-            Player player = new Player();
-            DateTime _nextLoop = DateTime.Now;
+            var serviceProvider = new ServiceCollection()
+           //.AddLogging()
+           .AddSingleton<IIdGenerator, IdGenerator>()
+           .AddSingleton<IConnectionManager, ConnectionManager>()
+           .AddSingleton<IGameManager, GameManager>()
+           .BuildServiceProvider();
 
-            Thread thread = new Thread(() => SendFoodPosition(udpServer, remoteEP));
-            thread.Start();
-            while (true)
-            {
-                while (_nextLoop < DateTime.Now)
-                {
-                    Vector2 direction = ReceiveDirection(udpServer, remoteEP);
-                    SendPosition(udpServer, direction, player, remoteEP);
-                    _nextLoop = _nextLoop.AddMilliseconds(20);
-                    if (_nextLoop > DateTime.Now)
-                    {
-                        // If the execution time for the next tick is in the future, aka the server is NOT running behind
-                        Thread.Sleep(_nextLoop - DateTime.Now); // Let the thread sleep until it's needed again.
-                    }
-                }
-            }
-        }
+            return serviceProvider;
+            /*
+            //configure console logging
+            serviceProvider
+                .GetService<ILoggerFactory>()
+                .AddConsole(LogLevel.Debug);
 
-        private static IPEndPoint ReceiveUsername(UdpClient udpServer, IPEndPoint remoteEP)
-        {
-            var data = udpServer.Receive(ref remoteEP); // listen on port 11000
-            string value;
-            try
-            {
-                value = Encoding.ASCII.GetString(data, 0, data.Length); // Convert the bytes to a string
-            }
-            catch
-            {
-                throw new Exception("Could not read value of type 'string'!");
-            }
-            Console.WriteLine(value);
-            return remoteEP;
-        }
-
-        private static Vector2 ReceiveDirection(UdpClient udpServer, IPEndPoint remoteEP)
-        {
-                var directionBytes = udpServer.Receive(ref remoteEP); // listen on port 11000
-                Console.Write("receive data from " + remoteEP.ToString());
-                float x, y;
-                try
-                {
-                    x = BitConverter.ToSingle(directionBytes, 0); // Convert the bytes to a string
-                    y = BitConverter.ToSingle(directionBytes, 4);
-                    Console.WriteLine($"x = {x}; y = {y}");
-                    return new Vector2(x, y);
-                }
-                catch
-                {
-                    throw new Exception("Could not read value of type '2 floats'!");
-                }
-            
-        }
-
-        private static void SendPosition(UdpClient udpServer, Vector2 direction, Player player, IPEndPoint remoteEP)
-        {
-            Vector2 position = player.GetPosition(direction);
-            Console.WriteLine(position);
-            List<byte> message = new List<byte>();
-            message.AddRange(BitConverter.GetBytes(0));
-            message.AddRange(BitConverter.GetBytes(position.X));
-            message.AddRange(BitConverter.GetBytes(position.Y));
-            udpServer.Send(message.ToArray(), message.Count, remoteEP);
-        }
-
-        private static void SendFoodPosition(UdpClient udpServer, IPEndPoint remoteEP)
-        {
-            while (true)
-            {
-                Vector2 position = FoodCreator.CreateFood();
-                Console.WriteLine("Food spawned = " + position);
-                List<byte> message = new List<byte>();
-                message.AddRange(BitConverter.GetBytes(1));
-                message.AddRange(BitConverter.GetBytes(position.X));
-                message.AddRange(BitConverter.GetBytes(position.Y));
-                udpServer.Send(message.ToArray(), message.Count, remoteEP);
-                Thread.Sleep(100);
-            }
+            var logger = serviceProvider.GetService<ILoggerFactory>()
+                .CreateLogger<Program>();
+            logger.LogDebug("Starting application");
+            */
+            //do the actual work here
         }
     }
 }
